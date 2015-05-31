@@ -1,7 +1,0 @@
-<div class="col-md-8 col-md-offset-2">
-	<h2 class="text-center">Select a Location:</h2>
-	<input type="text" class="form-control" data-ng-model="locationQuery" placeholder="Type to search">
-	<div class="col-sm-3" data-ng-repeat="location in Location.locations | filter:locationQuery">
-		<a ui-sref="forecast({ spotId: {{location.id}} })" data-ng-bind="location.name"></a>
-	</div>
-</div>
