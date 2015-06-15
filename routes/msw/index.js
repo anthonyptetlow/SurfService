@@ -13,7 +13,7 @@ router.get('/forecast/:spot_id', function (req, res) {
     .then(function (data) {
         res.json(data).end();
     }, function (error) {
-        res.satus(500).send(error);
+        res.status(500).send(error);
     });
 });
 
@@ -22,8 +22,14 @@ router.get('/locations', function (req, res) {
     .then(function (data) {
         res.json(data).end();
     }, function (error) {
-        res.satus(500).send(error);
+        res.status(500).send(error);
     });
+});
+
+
+router.get('/locations/update', function (req, res) {
+    Surf.locations.updateAllLocations();
+    res.status(200).send();
 });
 
 router.get('/locations/:partialName', function (req, res) {
@@ -31,7 +37,7 @@ router.get('/locations/:partialName', function (req, res) {
     .then(function (data) {
         res.json(data).end();
     }, function (error) {
-        res.satus(500).send(error);
+        res.status(500).send(error);
     });
 });
 
@@ -40,7 +46,7 @@ router.post('/locations', function (req, res) {
     .then(function (data) {
         res.json(data).end();
     }, function (error) {
-        res.satus(500).send(error);
+        res.status(500).send(error);
     });
 });
 

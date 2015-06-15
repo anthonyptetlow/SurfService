@@ -13,7 +13,7 @@ var mongoUri = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/SurfStore'
 
 mongoose.connect(mongoUri); // connect to our database
 
-app.set('port', (process.env.PORT || 6000));
+app.set('port', (process.env.PORT || 5005));
 
 app.use(errorHandler({dumpExceptions: true, showStack: true}));
 app.use(bodyParser.json());

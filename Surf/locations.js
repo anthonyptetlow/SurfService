@@ -1,5 +1,6 @@
 var q = require('q'),
-	_ = require('lodash');
+	_ = require('lodash'),
+	forecast = require('./forecast.js');
 
 var LocationModel = require('./models/Location.js');
 
@@ -9,7 +10,6 @@ function stripDatabaseLocation(location) {
 		name: location.name
 	};
 }
-
 
 function createLocation(id, name) {
 	var deferred = q.defer();
@@ -51,8 +51,22 @@ function searchLocations(partialName) {
 	return deferred.promise;
 }
 
+function updateAllLocations() {
+	for(i = 1; i < 5050; i ++) {
+	// for(i = 616; i < 618; i ++) {
+		forecast.getForecast(i).then(function (data) {
+			createLocation(data.place.id, data.place.name);
+		}
+		// , function (er) {
+		//TODO Add code to log failures
+		// }
+		);
+	}
+}
+
 module.exports = {
 	createLocation: createLocation,
 	getLocations: getAllLocations,
-	searchLocations: searchLocations
+	searchLocations: searchLocations,
+	updateAllLocations: updateAllLocations
 };
