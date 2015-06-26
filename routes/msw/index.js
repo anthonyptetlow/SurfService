@@ -1,4 +1,5 @@
 var express = require('express'),
+    // tokenCheck = require('../../middleware/tokenCheck.js'),
     router = express.Router(),
     q = require('q');
 
@@ -32,7 +33,7 @@ router.get('/locations/update', function (req, res) {
     res.status(200).send();
 });
 
-router.get('/locations/:partialName', function (req, res) {
+router.get('/locations/find/:partialName', function (req, res) {
     Surf.locations.searchLocations(req.params.partialName)
     .then(function (data) {
         res.json(data).end();
