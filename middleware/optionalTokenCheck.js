@@ -6,11 +6,10 @@ module.exports = function tokenCheck(req, res, next) {
         request(config.userServiceURL + 'api/token/' + req.query.token).then(function(data) {
         	req.user = JSON.parse(data);
         	next();
-        }, function (error) {
-			res.status(401).json(JSON.parse(error.response.body));
+        }, function () {
+        	next();
         })
-
 	} else {
-		res.status(401).json({error: 'NO_TOKEN', message: 'This is an authenticated URL, a valid token must be provided.'});
+    	next();
 	}
 }
