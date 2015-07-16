@@ -39,7 +39,6 @@ router.get('/locations', function (req, res) {
     });
 });
 
-
 router.get('/locations/update', function (req, res) {
     Surf.locations.updateAllLocations();
     res.status(200).send();
@@ -63,7 +62,7 @@ router.post('/locations', function (req, res) {
     });
 });
 
-router.get('/favourite', tokenCheck, function (req, res) {
+router.get('/locations/favourite', tokenCheck, function (req, res) {
     Surf.locations.getFavourites(req.user.id)
     .then(function (locations){
         res.status(200).json(locations);
@@ -72,7 +71,7 @@ router.get('/favourite', tokenCheck, function (req, res) {
     })
 });
 
-router.post('/favourite', tokenCheck, function (req, res) {
+router.post('/locations/favourite', tokenCheck, function (req, res) {
     Surf.locations.saveFavourite(req.body.locationId, req.user.id)
     .then(function (data) {
         res.json(data).send();
@@ -81,6 +80,15 @@ router.post('/favourite', tokenCheck, function (req, res) {
     });
 });
 
+router.delete('/locations/favourite', tokenCheck, function (req, res) {
+    Surf.locations.deleteFavourite(req.body.locationId, req.user.id)
+    .then(function (data) {
+        res.json(data).send();
+    }, function (error) {
+        res.status(500).send(error);
+    });
+    // res.status(200).send();
+});
 
 
 

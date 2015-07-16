@@ -134,6 +134,19 @@ function isFavourite(locationId, userId) {
 	return deferred.promise;
 }
 
+function deleteFavourite(locationId, userId) {
+	var deferred = q.defer();
+
+	FavouriteLocation.remove({locationId: locationId, userId: userId}, function (error) {
+		if(error) {
+			deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when removing favorite from location', errorData: error});
+		} else {
+			deferred.resolve();
+		}
+	});
+	return deferred.promise;
+}
+
 module.exports = {
 	createLocation: createLocation,
 	getLocations: getAllLocations,
@@ -141,5 +154,6 @@ module.exports = {
 	updateAllLocations: updateAllLocations,
 	getFavourites: getFavourites,
 	saveFavourite: saveFavourite,
-	isFavourite: isFavourite
+	isFavourite: isFavourite,
+	deleteFavourite: deleteFavourite
 };
