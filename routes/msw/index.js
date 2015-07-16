@@ -81,7 +81,7 @@ router.post('/locations/favourite', tokenCheck, function (req, res) {
 });
 
 router.delete('/locations/favourite', tokenCheck, function (req, res) {
-    Surf.locations.deleteFavourite(req.body.locationId, req.user.id)
+    Surf.locations.deleteFavourite(req.query.locationId, req.user.id)
     .then(function (data) {
         res.json(data).send();
     }, function (error) {

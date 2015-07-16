@@ -29,7 +29,7 @@ function createLocation(id, name) {
 
 function getLocation(id) {
 	var deferred = q.defer();
-	LocationModel.findById(id, function (error, location) {console.log(location);
+	LocationModel.findById(id, function (error, location) {
 		if (error) {
 			deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when finding location', errorData: error});
 		} else if (location == null) {
@@ -124,7 +124,6 @@ function saveFavourite(locationId, userId) {
 
 function isFavourite(locationId, userId) {
 	var deferred = q.defer();
-	console.log(arguments);
 	getFavourites(userId).then(function (favourites) {
 		// console.log(favourites);
 		var matches = _.filter(favourites, function (favourite) {
@@ -137,13 +136,14 @@ function isFavourite(locationId, userId) {
 function deleteFavourite(locationId, userId) {
 	var deferred = q.defer();
 
-	FavouriteLocation.remove({locationId: locationId, userId: userId}, function (error) {
-		if(error) {
-			deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when removing favorite from location', errorData: error});
+	FavouriteLocation.remove({location: locationId, userId: userId}, function (error) {
+		if (error) {
+			deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when removing a favourite', errorData: error});
 		} else {
 			deferred.resolve();
 		}
 	});
+
 	return deferred.promise;
 }
 
