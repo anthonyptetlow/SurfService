@@ -13,4 +13,4 @@ module.exports = function tokenCheck(req, res, next) {
 	} else {
 		res.status(401).json({error: 'NO_TOKEN', message: 'This is an authenticated URL, a valid token must be provided.'});
 	}
-}
+};
