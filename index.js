@@ -5,9 +5,10 @@ var express = require('express'),
     cookieParser = require('cookie-parser'),
     errorHandler = require('errorhandler'),
     mongoose   = require('mongoose'),
-    app = express();
+    app = express()
+    tokenCheck = require('./middleware/tokenCheck.js');
 
-
+var version = 'v0.1';
 
 var mongoUri = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/SurfStore'
 
@@ -37,12 +38,36 @@ app.use(function(req, res, next) {
 });
 
 
-app.use(express.static(__dirname + '/../public'));
+// app.use(express.static(__dirname + '/../public'));
 
+//Enable Route Logging
 app.use('/api', morgan('dev'));
 
-app.use('/api/msw', require('./routes/msw'));
+//Forcast api and legacy surf api
+app.use('/api/surf/v0.0', require('./routes/msw'));
 
+
+var Locations = require('./routes/locations.js');
+SurfRouter = express.Router();
+
+//Set the base url for the router
+app.use('/api/surf/' + version, SurfRouter);
+
+//Location URLs
+SurfRouter.get('/locations', Locations.getAll);
+SurfRouter.get('/locations/find/:partialName', Locations.find);
+SurfRouter.post('/locations', Locations.create);
+
+//Location Favorite URLs
+SurfRouter.get('/locations/favourite', tokenCheck, Locations.favourites.get);
+SurfRouter.post('/locations/favourite', tokenCheck, Locations.favourites.add);
+SurfRouter.delete('/locations/favourite', tokenCheck, Locations.favourites.remove);
+
+
+//An Admin route to update the locations fro msw rss feed
+SurfRouter.post('/locations/update/', Locations.updateFromMSW);
+
+//404 and Error Pages
 app.use(require('./middleware/notFound'));
 app.use(require('./middleware/handleError'));
 
