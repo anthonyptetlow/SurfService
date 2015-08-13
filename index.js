@@ -8,7 +8,6 @@ var express = require('express'),
     app = express()
     tokenCheck = require('./middleware/tokenCheck.js');
 
-var version = 'v0.1';
 
 var mongoUri = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/SurfStore'
 
@@ -36,15 +35,18 @@ app.use(function(req, res, next) {
 //Enable Route Logging
 app.use('/api', morgan('dev'));
 
+
+var serverVersion = 'v0.0';
 //Forcast api and legacy surf api
-app.use('/api/surf/v0.0', require('./routes/msw'));
+app.use('/api/surf/' + serverVersion, require('./routes/msw'));
 
 
+serverVersion = 'v0.1';
 var Locations = require('./routes/locations.js');
 SurfRouter = express.Router();
 
 //Set the base url for the router
-app.use('/api/surf/' + version, SurfRouter);
+app.use('/api/surf/' + serverVersion, SurfRouter);
 
 //Location URLs
 SurfRouter.get('/locations', Locations.getAll);
