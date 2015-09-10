@@ -10,6 +10,16 @@ function getAll(req, res) {
     });
 }
 
+function getLocation(req, res) {
+    Locations.getLocation(req.params.locationId)
+    .then(function (data) {
+        res.json(data);
+    }, function (error) {
+        res.status(500).send(error);
+    });
+}
+
+
 function updateFromMSW(req, res) {
     Locations.updateAllLocations();
     res.status(200).send();
@@ -35,7 +45,8 @@ function getFavourites(req, res) {
 }
 
 function createLocation(req, res) {
-    Locations.createLocation(req.body.id, req.body.name)
+    console.log(req.body);
+    Locations.createLocation(req.body)
     .then(function (data) {
         res.json(data).send();
     }, function (error) {
@@ -64,6 +75,7 @@ function removeFavorite(req, res) {
 
 module.exports = {
 		getAll: getAll,
+        get: getLocation,
 		find: findLocation,
 		create: createLocation,
 		updateFromMSW: updateFromMSW,

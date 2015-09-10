@@ -35,21 +35,21 @@ app.use(function(req, res, next) {
 //Enable Route Logging
 app.use('/api', morgan('dev'));
 
-
-var serverVersion = 'v0.0';
-//Forcast api and legacy surf api
-app.use('/api/surf/' + serverVersion, require('./routes/msw'));
-
-
-serverVersion = 'v0.1';
+serverVersion = 'v0.2';
 var Locations = require('./routes/locations.js');
+var Forecasts = require('./routes/forecasts.js');
 SurfRouter = express.Router();
 
 //Set the base url for the router
 app.use('/api/surf/' + serverVersion, SurfRouter);
 
+//Forecast Urls
+SurfRouter.get('/forecast/:locationId', Forecasts.get);
+// SurfRouter.get('/forecast/:latitude/:longitude', Forecasts.getWWO);
+
 //Location URLs
 SurfRouter.get('/locations', Locations.getAll);
+SurfRouter.get('/locations/:locationId', Locations.get);
 SurfRouter.get('/locations/find/:partialName', Locations.find);
 SurfRouter.post('/locations', Locations.create);
 

@@ -1,166 +1,127 @@
-var xml2js = require('xml2js'),
-    request = require('request-promise'),
-    q = require('q'),
-    _ = require('lodash'),
-    util = require('./util.js');
+var q = require('q'),
+	rp =  require('request-promise');
 
-var ForecastModel = require('./models/Forecast.js');
+var wwoKey = require('../config.json').wwoKey;
+var baseUrl = 'http://api.worldweatheronline.com/premium/v1/marine.ashx?key=' + wwoKey + '&format=json&tp=24'
 
-var parser = new xml2js.Parser();
+var Locations = require('./locations.js'),
+	ForecastModel = require('./models/Forecast.js');
+
+// API Parameters
+// q - Latitude and longitude q=48.834,2.394
+// fx - Whether to return weather forecast output. yes(D) or no
+// format - The output format to return. xml(D) or json
+// key - The API key.
+// tp - Specifies the weather forecast time interval in hours. Options are: 1 hour, 3 hourly(D), 6 hourly, 12 hourly (day/night) or 24 hourly (day average).
+// tide - To return tide data information if available yes no(D)
+
+function getForecastFromWWO(latitude, longitude) {
+	var options = {
+	    uri : baseUrl + '&q=' + latitude + ',' + longitude,
+	    method : 'GET'
+	};
+	return rp(options).then(function (data) {
+		return JSON.parse(data);
+	});
+}
+
 
 function getToday() {
     return new Date(new Date().setHours(0,0,0,0));
 }
 
-function getUrl(i) {
-    return 'http://magicseaweed.com/syndicate/rss/index.php?id=' + i + '&unit=uk';
+
+function getForecastFromStore(locationId) {
+	// var deferred = q.defer();
+	return ForecastModel.find({location: locationId}).populate('location').exec();
+	// return deferred.promise;
 }
 
-function processRssFeed(feed) {
-    var newFeed;
-    if (feed.rss) {
+function purgeForecastsForLocation(locationId) {
+	var deferred = q.defer();
 
-        newFeed = {
-            place: {
-                name: util.parsePlaceFromChannelTitle(feed.rss.channel[0].title[0])
-            }
-        };
-
-        newFeed.forecast = _.map(feed.rss.channel[0].item, function (item) {
-            return {
-                date: util.parseDateFromTitle(item.title[0]),
-                weather: util.parseForcastFromDescription(item.description[0])
-            };
-        });
-    }
-    return newFeed;
+	ForecastModel.remove({location: locationId}, function (error) {
+		if (error) {
+			deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when removing a favourite', errorData: error});
+		} else {
+			deferred.resolve();
+		}
+	});
+	return deferred.promise;
 }
 
-function getForecast(index) {
-    var deferred = q.defer();
+function createFromWWOWeatherItem(locationId, data) {
+	var deferred = q.defer();
 
-    //Check to see if we have a stored five day forecast
-    getFiveDayForecast(index).then(function (forecast) {
-        //If we have 5 days then serve it up
-        if (forecast.length >= 5) {
-            console.log('forecast', forecast);
+	var weather = {
+		location: '55ef2c3c578c651ac9ed08b4',
+		date: data.date,
+		maxTemp: data.maxtempC,
+		minTemp: data.mintempC,
+		// sunrise: data.astronomy[0].sunrise,
+		// sunset: data.astronomy[0].sunrise,
+		hourly: [{
+			swell: {
+				sigHeight: data.hourly[0].sigHeight_m,
+				height: data.hourly[0].swellHeight_m,
+				period: data.hourly[0].swellPeriod_secs,
+				direction: data.hourly[0].swellDir
+			},
+			wind: {
+				speed: data.hourly[0].windspeedKmph,
+				gust: data.hourly[0].WindGustKmph,
+				direction: data.hourly[0].winddirDegree
+			},
+			temperature: data.hourly[0].tempC
+		}]
+	};
 
-            var data = {
-                place: {
-                    name: forecast[0].location.name,
-                    id: index,
-                },
-                forecast: forecast,
-                stored: true
-            };
+	var forecastItem = new ForecastModel(weather);
 
-            deferred.resolve(data);
-        //Else go to MSW RSS to get the data
-        } else {
-            try {
-                var url = getUrl(index);
-                request(url).then(function(data) {
-                    parser.parseString(data, function(error, result) {
-                        if (error) {
-                            deferred.reject(error);
-                        }
-                        try {
-                            var rssAsJson = processRssFeed(result);
-                        } catch(e) {
-                            deferred.reject(e);
-                        }
+	forecastItem.save(function (error) {
+		if (error) {
+			deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when removing a favourite', errorData: error});
+		} else {
+			deferred.resolve();
+		}
+	});
+	return deferred.promise;
+}
 
-                        if (!rssAsJson) {
-                            deferred.reject({error: 'unable to parse json'});
-                        } else {
-                            rssAsJson.place.id = index;
-
-                            // Once data is pulled from the api store it in the DB
-                            rssAsJson.forecast.forEach(function(data){
-                                saveForcastData(index, data)
-                            });
-
-                            deferred.resolve(rssAsJson);
-                        }
-                    });
-
-                }, function (error) {
-                    deferred.reject(error);
-                });
-            }
-            catch (err) {
-                deferred.reject({error: err, message: 'unable to retrive or parse msw'});
-            }
-        }
-    });
-
-    return deferred.promise;
+function storeWeather(locationId, weather) {
+	return q.all(weather.map(function (data) {
+		return createFromWWOWeatherItem(locationId, data);
+	}));
 }
 
 
-function getFiveDayForecast(id) {
-    var deferred = q.defer();
-    ForecastModel.find({location: id,  date: {"$gte": getToday()}}).populate('location').exec(function (error, forecasts) {
-        if (error) {
-            deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when finding location', errorData: error});
-        } else if (forecasts == null) {
-            deferred.reject({error: 'FORECAST_NOT_FOUND', message: 'No forecast data found'});
-        } else {
-            deferred.resolve(forecasts);
-        }
-    });
-    return deferred.promise;
+function getAndStoreWWOForecast(locationId) {
+
+	return purgeForecastsForLocation(locationId).then(function () {
+		return Locations.getLocation(locationId);
+	}).then(function (data) {
+		return getForecastFromWWO(data.coordinate.latitude, data.coordinate.longitude);
+	}).then(function (result) {
+ 		return storeWeather(locationId, result.data.weather);
+	}).then(function () {
+		return getForecastFromStore(locationId);
+	});
 }
 
-function findForecastForDate(id, date) {
-    var deferred = q.defer();
-    var day = new Date(date.setHours(0,0,0,0));
-    var nextDay = new Date(new Date(day).setDate(day.getDate() + 1));
-
-    ForecastModel.find({location: id, date: {"$gte": day, "$lt": nextDay}}, function (error, forecast) {
-        if (error) {
-            deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when finding location', errorData: error});
-        } else if (forecast == null) {
-            deferred.reject({error: 'FORECAST_NOT_FOUND', message: 'No forecast data found'});
-        } else {
-            deferred.resolve(forecast);
-        }
-    });
-    return deferred.promise;
+function getForecast(locationId) {
+	return getForecastFromStore(locationId).then(function (forecast) {
+		if (forecast.length >= 3) {
+			console.log('Store Forecast Served');
+			return forecast;
+		} else {
+			return getAndStoreWWOForecast(locationId);
+		}
+	});
 }
 
-function saveForcastData(id, data) {
-    var deferred = q.defer();
-    //Find existing entries and update them else create a new entry
-    findForecastForDate(id, data.date).then(function(forecast) {
-        if(forecast.length >= 1) {
-            forecast[0].weather = data.weather;
-            forecast[0].save(function (error) {
-                if (error) {
-                    deferred.reject(error);
-                } else {
-                    deferred.resolve();
-                }            });
-        } else {
-            var ForecastObj = new ForecastModel({
-                location: id,
-                date: data.date,
-                weather: data.weather
-            });
 
-            ForecastObj.save(function (error) {
-                if (error) {
-                    deferred.reject(error);
-                } else {
-                    deferred.resolve();
-                }
-            });
-        }
-    });
-
-    return deferred.promise;
-}
 
 module.exports = {
-    getForecast: getForecast
-}
+	get: getForecast,
+	getForecastFromWWO: getForecastFromWWO
+};

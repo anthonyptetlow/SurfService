@@ -1,6 +1,5 @@
 var q = require('q'),
-	_ = require('lodash'),
-	forecast = require('./forecast.js');
+	_ = require('lodash');
 
 var LocationModel = require('./models/Location.js'),
 	FavouriteLocation = require('./models/FavouriteLocation.js');
@@ -8,15 +7,29 @@ var LocationModel = require('./models/Location.js'),
 function stripDatabaseLocation(location) {
 	return {
 		id: location._id,
-		name: location.name
+		name: location.name,
+		image: location.image,
+		bayImagePath: location.bayImagePath,
+		coordinate: {
+			latitude: location.location[0],
+			longitude: location.location[1]
+		}
 	};
 }
 
-function createLocation(id, name) {
+function createLocation(locationOptions) {
 	var deferred = q.defer();
 	var location = new LocationModel();
-	location._id = id;
-	location.name = name;
+
+	location.name = locationOptions.name;
+	location.bearchPerp = locationOptions.bearchPerp;
+	location.bayImagePat = locationOptions.bayImagePath;
+	location.image = locationOptions.image;
+
+	if((!!locationOptions.coordinate.longitude) && (!!locationOptions.coordinate.latitude)) {
+		location.location = [locationOptions.coordinate.longitude, locationOptions.coordinate.latitude];
+	}
+
 	location.save(function (error) {
 		if (error) {
 			deferred.reject(error);
@@ -65,18 +78,6 @@ function searchLocations(partialName) {
 		}
 	});
 	return deferred.promise;
-}
-
-function updateAllLocations() {
-	for(i = 1; i < 5050; i ++) {
-		forecast.getForecast(i).then(function (data) {
-			createLocation(data.place.id, data.place.name);
-		}
-		// , function (er) {
-		//TODO Add code to log failures
-		// }
-		);
-	}
 }
 
 function getFavourites(userId) {
@@ -150,8 +151,8 @@ function deleteFavourite(locationId, userId) {
 module.exports = {
 	createLocation: createLocation,
 	getLocations: getAllLocations,
+	getLocation: getLocation,
 	searchLocations: searchLocations,
-	updateAllLocations: updateAllLocations,
 	getFavourites: getFavourites,
 	saveFavourite: saveFavourite,
 	isFavourite: isFavourite,

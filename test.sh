@@ -1,0 +1,1 @@
+curl -X POST -H "Content-Type: application/json" -d '{"name": "Machrihanish", "bearchPerp": 315, "coordinate": { "longitude": 55.423991, "latitude": -5.733783}}'  localhost:5005/api/surf/v0.2/locations
