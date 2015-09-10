@@ -33,7 +33,7 @@ function getToday() {
 
 function getForecastFromStore(locationId) {
 	// var deferred = q.defer();
-	return ForecastModel.find({location: locationId}).populate('location').exec();
+	return ForecastModel.find({location: locationId}).exec();
 	// return deferred.promise;
 }
 
@@ -121,7 +121,16 @@ function getForecast(locationId) {
 
 
 
+function getFormattedForecast(locationId) {
+	return q.all([Locations.getLocation(locationId), getForecast(locationId)]).then(function(results) {
+		return {
+			location: results[0],
+			forecast: results[1]
+		};
+	});
+}
+
 module.exports = {
-	get: getForecast,
-	getForecastFromWWO: getForecastFromWWO
+	get: getFormattedForecast
+	// getForecastFromWWO: getForecastFromWWO
 };
