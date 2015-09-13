@@ -54,7 +54,7 @@ function createFromWWOWeatherItem(locationId, data) {
 	var deferred = q.defer();
 
 	var weather = {
-		location: '55ef2c3c578c651ac9ed08b4',
+		location: locationId,
 		date: data.date,
 		maxTemp: data.maxtempC,
 		minTemp: data.mintempC,
@@ -102,6 +102,7 @@ function getAndStoreWWOForecast(locationId) {
 	}).then(function (data) {
 		return getForecastFromWWO(data.coordinate.latitude, data.coordinate.longitude);
 	}).then(function (result) {
+		console.log(result);
  		return storeWeather(locationId, result.data.weather);
 	}).then(function () {
 		return getForecastFromStore(locationId);
@@ -114,6 +115,7 @@ function getForecast(locationId) {
 			console.log('Store Forecast Served');
 			return forecast;
 		} else {
+			console.log('New Data');
 			return getAndStoreWWOForecast(locationId);
 		}
 	});
@@ -121,8 +123,8 @@ function getForecast(locationId) {
 
 
 
-function getFormattedForecast(locationId) {
-	return q.all([Locations.getLocation(locationId), getForecast(locationId)]).then(function(results) {
+function getFormattedForecast(locationId, userId) {
+	return q.all([Locations.getLocation(locationId, userId), getForecast(locationId)]).then(function(results) {
 		return {
 			location: results[0],
 			forecast: results[1]
@@ -131,6 +133,6 @@ function getFormattedForecast(locationId) {
 }
 
 module.exports = {
-	get: getFormattedForecast
-	// getForecastFromWWO: getForecastFromWWO
+	get: getFormattedForecast,
+	getForecastFromWWO: getForecastFromWWO
 };

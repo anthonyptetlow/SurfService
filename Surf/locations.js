@@ -40,15 +40,25 @@ function createLocation(locationOptions) {
 	return deferred.promise;
 }
 
-function getLocation(id) {
+function getLocation(locationId, userId) {
 	var deferred = q.defer();
-	LocationModel.findById(id, function (error, location) {
+	LocationModel.findById(locationId, function (error, location) {
 		if (error) {
 			deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when finding location', errorData: error});
 		} else if (location == null) {
 			deferred.reject({error: 'LOCATION_NOT_FOUND', message: 'No location data found'});
 		} else {
-			deferred.resolve(stripDatabaseLocation(location));
+			if (userId) {
+				isFavourite(locationId, userId).then(function (isFavourite) {
+					console.log(location);
+					var strippedLocation = stripDatabaseLocation(location);
+					strippedLocation.isFavourite = isFavourite;
+					deferred.resolve(strippedLocation);
+				});
+
+			} else {
+				deferred.resolve(stripDatabaseLocation(location));
+			}
 		}
 	});
 

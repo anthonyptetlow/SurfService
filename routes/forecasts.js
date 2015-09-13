@@ -1,10 +1,13 @@
 var Forecast = require('../Surf/forecast.js');
 
 function getForecast(req, res) {
-    Forecast.get(req.params.locationId)
+    console.log(req.user ? req.user.id : undefined);
+    Forecast.get(req.params.locationId, req.user ? req.user.id : undefined)
     .then(function (data) {
         res.json(data);
     }, function (error) {
+        res.status(500).send(error);
+    }).catch(function(error) {
         res.status(500).send(error);
     });
 }

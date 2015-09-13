@@ -5,7 +5,7 @@ module.exports = mongoose.model('FavouriteLocation',
 	new Schema({
 		userId: Schema.Types.ObjectId,
 		location: {
-			type: Number,
+			type: Schema.Types.ObjectId,
 			ref: 'Location'
 		}
 	})

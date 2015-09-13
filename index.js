@@ -6,7 +6,8 @@ var express = require('express'),
     errorHandler = require('errorhandler'),
     mongoose   = require('mongoose'),
     app = express()
-    tokenCheck = require('./middleware/tokenCheck.js');
+    tokenCheck = require('./middleware/tokenCheck.js'),
+    optionalTokenCheck = require('./middleware/optionalTokenCheck.js');
 
 
 var mongoUri = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/SurfStore'
@@ -44,19 +45,19 @@ SurfRouter = express.Router();
 app.use('/api/surf/' + serverVersion, SurfRouter);
 
 //Forecast Urls
-SurfRouter.get('/forecast/:locationId', Forecasts.get);
+SurfRouter.get('/forecast/:locationId', optionalTokenCheck, Forecasts.get);
 // SurfRouter.get('/forecast/:latitude/:longitude', Forecasts.getWWO);
+
+//Location Favorite URLs
+SurfRouter.get('/locations/favourite', tokenCheck, Locations.favourites.get);
+SurfRouter.post('/locations/favourite', tokenCheck, Locations.favourites.add);
+SurfRouter.delete('/locations/favourite', tokenCheck, Locations.favourites.remove);
 
 //Location URLs
 SurfRouter.get('/locations', Locations.getAll);
 SurfRouter.get('/locations/:locationId', Locations.get);
 SurfRouter.get('/locations/find/:partialName', Locations.find);
 SurfRouter.post('/locations', Locations.create);
-
-//Location Favorite URLs
-SurfRouter.get('/locations/favourite', tokenCheck, Locations.favourites.get);
-SurfRouter.post('/locations/favourite', tokenCheck, Locations.favourites.add);
-SurfRouter.delete('/locations/favourite', tokenCheck, Locations.favourites.remove);
 
 
 //An Admin route to update the locations fro msw rss feed
@@ -67,5 +68,5 @@ app.use(require('./middleware/notFound'));
 app.use(require('./middleware/handleError'));
 
 app.listen(app.get('port'), function() {
-  console.log("Node app is running at localhost:" + app.get('port'));
+  console.log("Surf Service is running at localhost:" + app.get('port'));
 });
