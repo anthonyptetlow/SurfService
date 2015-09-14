@@ -44,6 +44,10 @@ SurfRouter = express.Router();
 //Set the base url for the router
 app.use('/api/surf/' + serverVersion, SurfRouter);
 
+SurfRouter.get('/', function(req, res) {
+    res.send('Welcome to the Surf Service ' + serverVersion);
+});
+
 //Forecast Urls
 SurfRouter.get('/forecast/:locationId', optionalTokenCheck, Forecasts.get);
 // SurfRouter.get('/forecast/:latitude/:longitude', Forecasts.getWWO);
