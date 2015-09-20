@@ -37,8 +37,9 @@ app.use(function(req, res, next) {
 app.use('/api', morgan('dev'));
 
 serverVersion = 'v0.2';
-var Locations = require('./routes/locations.js');
-var Forecasts = require('./routes/forecasts.js');
+var Locations = require('./routes/locations.js'),
+    Forecasts = require('./routes/forecasts.js'),
+    Regions = require('./routes/regions.js');
 SurfRouter = express.Router();
 
 //Set the base url for the router
@@ -63,9 +64,12 @@ SurfRouter.get('/locations/:locationId', Locations.get);
 SurfRouter.get('/locations/find/:partialName', Locations.find);
 SurfRouter.post('/locations', Locations.create);
 
+//Location URLs
+SurfRouter.get('/regions', Regions.getAll);
+SurfRouter.get('/regions/:regionId', Regions.get);
+SurfRouter.get('/regions/find/:partialName', Regions.find);
+SurfRouter.post('/regions', Regions.create);
 
-//An Admin route to update the locations fro msw rss feed
-SurfRouter.post('/locations/update/', Locations.updateFromMSW);
 
 //404 and Error Pages
 app.use(require('./middleware/notFound'));

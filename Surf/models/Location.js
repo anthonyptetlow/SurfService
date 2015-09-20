@@ -24,14 +24,3 @@ module.exports = mongoose.model('Location',
 );
 // Europe UK + Ireland Scotland Inner Hebrides Machrihanish
 // Continent, Country, Region , Subregion
-
-// {
-// 	regionName:
-// 	parentRegion:
-// }
-// schema.pre('save', function (next) {
-//   if (this.isNew && Array.isArray(this.location) && 0 === this.location.length) {
-//     this.location = undefined;
-//   }
-//   next();
-// })

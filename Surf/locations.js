@@ -2,6 +2,7 @@ var q = require('q'),
 	_ = require('lodash');
 
 var LocationModel = require('./models/Location.js'),
+	RegionModel = require('./models/Region.js'),
 	FavouriteLocation = require('./models/FavouriteLocation.js');
 
 function stripDatabaseLocation(location) {
@@ -13,7 +14,8 @@ function stripDatabaseLocation(location) {
 		coordinate: {
 			latitude: location.location[0],
 			longitude: location.location[1]
-		}
+		},
+		region: location.region
 	};
 }
 
@@ -41,33 +43,30 @@ function createLocation(locationOptions) {
 }
 
 function getLocation(locationId, userId) {
-	var deferred = q.defer();
-	LocationModel.findById(locationId, function (error, location) {
-		if (error) {
-			deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when finding location', errorData: error});
-		} else if (location == null) {
-			deferred.reject({error: 'LOCATION_NOT_FOUND', message: 'No location data found'});
-		} else {
+
+	return LocationModel.findById(locationId).populate('region').exec().then(function (location) {
+
+		return LocationModel.populate(location, {
+		    path: 'region.ancestors',
+		    model: 'Region'
+		}).then(function (populatedLocation) {
+
 			if (userId) {
-				isFavourite(locationId, userId).then(function (isFavourite) {
-					console.log(location);
+				return isFavourite(locationId, userId).then(function (isFavourite) {
 					var strippedLocation = stripDatabaseLocation(location);
 					strippedLocation.isFavourite = isFavourite;
-					deferred.resolve(strippedLocation);
+					return strippedLocation;
 				});
-
 			} else {
-				deferred.resolve(stripDatabaseLocation(location));
+				return stripDatabaseLocation(location);
 			}
-		}
+		});
 	});
-
-	return deferred.promise;
 }
 
 function getAllLocations() {
 	var deferred = q.defer();
-	LocationModel.find(function (error, locations) {
+	LocationModel.find().populate('region').exec(function (error, locations) {
 		if (error) {
 			deferred.reject(error);
 		} else {
@@ -79,15 +78,16 @@ function getAllLocations() {
 
 
 function searchLocations(partialName) {
-	var deferred = q.defer();
-	LocationModel.find({name: new RegExp(partialName, 'i')} , function (error, locations) {
-		if (error) {
-			deferred.reject(error);
-		} else {
-			deferred.resolve(_(locations).map(stripDatabaseLocation));
-		}
-	});
-	return deferred.promise;
+	// var deferred = q.defer();
+	return LocationModel.find({name: new RegExp(partialName, 'i')}).populate('region').exec();
+	// .function (error, locations) {
+	// 	if (error) {
+	// 		deferred.reject(error);
+	// 	} else {
+	// 		deferred.resolve(_(locations).map(stripDatabaseLocation));
+	// 	}
+	// });
+	// return deferred.promise;
 }
 
 function getFavourites(userId) {
