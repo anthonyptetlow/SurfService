@@ -24,7 +24,7 @@ function generateLocationsSitemap(req, res) {
     generateForecastUrls()
     .then(function (data) {
         sitemap = Sitemap.createSitemap ({
-            hostname: 'http://surfpotter.eu',
+            hostname: 'http://surfspotter.eu',
             cacheTime: 600000,        // 600 sec - cache purge period
             urls: data.toJSON()
         });
