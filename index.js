@@ -39,7 +39,8 @@ app.use('/api', morgan('dev'));
 serverVersion = 'v0.2';
 var Locations = require('./routes/locations.js'),
     Forecasts = require('./routes/forecasts.js'),
-    Regions = require('./routes/regions.js');
+    Regions = require('./routes/regions.js'),
+    Sitemaps = require('./routes/sitemap.js');
 SurfRouter = express.Router();
 
 //Set the base url for the router
@@ -70,6 +71,8 @@ SurfRouter.get('/regions/:regionId', Regions.get);
 SurfRouter.get('/regions/find/:partialName', Regions.find);
 SurfRouter.post('/regions', Regions.create);
 
+
+SurfRouter.get('/sitemap/location', Sitemaps.locations);
 
 //404 and Error Pages
 app.use(require('./middleware/notFound'));
