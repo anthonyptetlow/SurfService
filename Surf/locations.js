@@ -78,16 +78,7 @@ function getAllLocations() {
 
 
 function searchLocations(partialName) {
-	// var deferred = q.defer();
 	return LocationModel.find({name: new RegExp(partialName, 'i')}).populate('region').exec();
-	// .function (error, locations) {
-	// 	if (error) {
-	// 		deferred.reject(error);
-	// 	} else {
-	// 		deferred.resolve(_(locations).map(stripDatabaseLocation));
-	// 	}
-	// });
-	// return deferred.promise;
 }
 
 function getFavourites(userId) {
