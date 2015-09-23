@@ -33,7 +33,7 @@ function getToday() {
 
 function getForecastFromStore(locationId) {
 	// var deferred = q.defer();
-	return ForecastModel.find({location: locationId}).exec();
+	return ForecastModel.find({location: locationId, date: {'$gte': getToday()}}).exec();
 	// return deferred.promise;
 }
 
@@ -111,8 +111,9 @@ function getAndStoreWWOForecast(locationId) {
 
 function getForecast(locationId) {
 	return getForecastFromStore(locationId).then(function (forecast) {
-		if (forecast.length >= 3) {
-			console.log('Store Forecast Served');
+		//Need to add in check here for which dates the forecast is on
+		if (forecast.length >= 7) {
+			console.log('Store Forecast Served', forecast);
 			return forecast;
 		} else {
 			console.log('New Data');

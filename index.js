@@ -40,7 +40,8 @@ serverVersion = 'v0.2';
 var Locations = require('./routes/locations.js'),
     Forecasts = require('./routes/forecasts.js'),
     Regions = require('./routes/regions.js'),
-    Sitemaps = require('./routes/sitemap.js');
+    Sitemaps = require('./routes/sitemap.js'),
+    Search = require('./routes/search.js');
 SurfRouter = express.Router();
 
 //Set the base url for the router
@@ -49,6 +50,8 @@ app.use('/api/surf/' + serverVersion, SurfRouter);
 SurfRouter.get('/', function(req, res) {
     res.send('Welcome to the Surf Service ' + serverVersion);
 });
+
+SurfRouter.get('/locations/find/:partialName', Search.searchLocationsAndRegion);
 
 //Forecast Urls
 SurfRouter.get('/forecast/:locationId', optionalTokenCheck, Forecasts.get);
@@ -62,7 +65,7 @@ SurfRouter.delete('/locations/favourite', tokenCheck, Locations.favourites.remov
 //Location URLs
 SurfRouter.get('/locations', Locations.getAll);
 SurfRouter.get('/locations/:locationId', Locations.get);
-SurfRouter.get('/locations/find/:partialName', Locations.find);
+// SurfRouter.get('/locations/find/:partialName', Locations.find);
 SurfRouter.post('/locations', Locations.create);
 
 //Location URLs
