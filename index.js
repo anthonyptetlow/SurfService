@@ -9,6 +9,7 @@ var express = require('express'),
     tokenCheck = require('./middleware/tokenCheck.js'),
     optionalTokenCheck = require('./middleware/optionalTokenCheck.js');
 
+var apicache = require('apicache').middleware;
 
 var mongoUri = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/SurfStore'
 
@@ -54,7 +55,7 @@ SurfRouter.get('/', function(req, res) {
 SurfRouter.get('/locations/find/:partialName', Search.searchLocationsAndRegion);
 
 //Forecast Urls
-SurfRouter.get('/forecast/:locationId', optionalTokenCheck, Forecasts.get);
+SurfRouter.get('/forecast/:locationId', apicache('1 hour') ,optionalTokenCheck, Forecasts.get);
 // SurfRouter.get('/forecast/:latitude/:longitude', Forecasts.getWWO);
 
 //Location Favorite URLs
