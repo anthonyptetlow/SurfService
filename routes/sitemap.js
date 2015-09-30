@@ -1,6 +1,7 @@
 var Sitemap = require('sitemap');
 
 var Locations = require('../Surf/locations.js');
+var Regions = require('../Surf/regions.js');
 
 function stringToURL(value) {
     return (!value) ? '' : value.trim().replace(/ /g, '-').replace('\'', '-');
@@ -43,6 +44,47 @@ function generateLocationsSitemap(req, res) {
 }
 
 
+
+function generateRegionSitemapObj(region) {
+    return {
+        url: '/region/' +  stringToURL(region.name) + '/' + region.id,
+        changefreq: 'monthly',
+        priority: 1
+    };
+}
+
+function generateRegionUrls() {
+   return Regions.getRegions().then(function(regions) {
+        return regions.map(generateRegionSitemapObj);
+    });
+}
+
+function generateRegionsSitemap(req, res) {
+    generateRegionUrls()
+    .then(function (data) {
+        console.log(data);
+        sitemap = Sitemap.createSitemap ({
+            hostname: 'http://surfspotter.eu',
+            cacheTime: 600000,        // 600 sec - cache purge period
+            urls: data
+        });
+
+        sitemap.toXML( function (err, xml) {
+            if (err) {
+                res.status(500).end();
+            } else {
+                res.header('Content-Type', 'application/xml');
+                res.send( xml );
+            }
+        });
+    }, function (error) {
+        res.status(500).send(error);
+    });
+}
+
+
+
 module.exports = {
-    locations: generateLocationsSitemap
+    locations: generateLocationsSitemap,
+    regions: generateRegionsSitemap
 };

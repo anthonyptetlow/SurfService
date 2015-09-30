@@ -79,6 +79,7 @@ SurfRouter.post('/regions', Regions.create);
 
 
 SurfRouter.get('/sitemap/location', Sitemaps.locations);
+SurfRouter.get('/sitemap/region', Sitemaps.regions);
 
 //404 and Error Pages
 app.use(require('./middleware/notFound'));
