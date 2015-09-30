@@ -19,6 +19,13 @@ function stripDatabaseLocation(location) {
 	};
 }
 
+function stripDatabaseFavourite(favourite) {
+	return {
+		id: favourite._id,
+		location: stripDatabaseLocation(favourite.location)
+	};
+}
+
 function createLocation(locationOptions) {
 	var deferred = q.defer();
 	var location = new LocationModel();
@@ -52,7 +59,9 @@ function getLocation(locationId, userId) {
 		}).then(function (populatedLocation) {
 
 			if (userId) {
+				console.log('Checking Fav');
 				return isFavourite(locationId, userId).then(function (isFavourite) {
+					console.log('Check Comlpete');
 					var strippedLocation = stripDatabaseLocation(location);
 					strippedLocation.isFavourite = isFavourite;
 					return strippedLocation;
@@ -87,7 +96,7 @@ function getFavourites(userId) {
 		if (error) {
 			deferred.reject(error);
 		} else {
-			deferred.resolve(favourites);
+			deferred.resolve(favourites.map(stripDatabaseFavourite));
 		}
 	});
 	return deferred.promise;
@@ -129,7 +138,7 @@ function isFavourite(locationId, userId) {
 	getFavourites(userId).then(function (favourites) {
 		// console.log(favourites);
 		var matches = _.filter(favourites, function (favourite) {
-				return favourite.location._id.toString() == locationId ;});
+				return favourite.location.id.toString() == locationId ;});
 		deferred.resolve(matches.length > 0);
 	});
 	return deferred.promise;
@@ -149,10 +158,22 @@ function deleteFavourite(locationId, userId) {
 	return deferred.promise;
 }
 
+function getLocationsInRegion(regionId) {
+	return LocationModel.find().populate('region').exec().then(function (locations) {
+		return locations.filter(function (location) {
+			return location.region._id == regionId || location.region.ancestors.indexOf(regionId) > -1;
+		});
+	}).then(function (locations) {
+		return locations.map(stripDatabaseLocation);
+	});
+}
+
+
 module.exports = {
 	createLocation: createLocation,
 	getLocations: getAllLocations,
 	getLocation: getLocation,
+	getLocationsInRegion: getLocationsInRegion,
 	searchLocations: searchLocations,
 	getFavourites: getFavourites,
 	saveFavourite: saveFavourite,

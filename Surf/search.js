@@ -12,7 +12,7 @@ function findLocations(partial) {
 		Regions.searchRegions(partial),
 	], function(locations, regions) {
 
-
+		console.log(regions);
 		return {
 			locations: locations,
 			regions: regions

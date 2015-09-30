@@ -73,10 +73,20 @@ function removeFavorite(req, res) {
     });
 }
 
+function getLocationsInRegion(req, res) {
+    // console.log(req.query);
+    Locations.getLocationsInRegion(req.params.regionId).then(function(data) {
+        res.json(data).send();
+    }, function (error) {
+        res.status(500).send(error);
+    });
+}
+
 module.exports = {
 		getAll: getAll,
         get: getLocation,
 		find: findLocation,
+        getLocationsInRegion: getLocationsInRegion,
 		create: createLocation,
 		updateFromMSW: updateFromMSW,
 		favourites: {

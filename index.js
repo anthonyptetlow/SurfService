@@ -65,13 +65,16 @@ SurfRouter.delete('/locations/favourite', tokenCheck, Locations.favourites.remov
 //Location URLs
 SurfRouter.get('/locations', Locations.getAll);
 SurfRouter.get('/locations/:locationId', Locations.get);
+
+SurfRouter.get('/regions/locations/:regionId', Locations.getLocationsInRegion);
+
 // SurfRouter.get('/locations/find/:partialName', Locations.find);
 SurfRouter.post('/locations', Locations.create);
 
 //Location URLs
 SurfRouter.get('/regions', Regions.getAll);
-SurfRouter.get('/regions/:regionId', Regions.get);
 SurfRouter.get('/regions/find/:partialName', Regions.find);
+SurfRouter.get('/regions/:regionId', Regions.get);
 SurfRouter.post('/regions', Regions.create);
 
 

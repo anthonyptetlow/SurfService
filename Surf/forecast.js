@@ -113,7 +113,6 @@ function getForecast(locationId) {
 	return getForecastFromStore(locationId).then(function (forecast) {
 		//Need to add in check here for which dates the forecast is on
 		if (forecast.length >= 7) {
-			console.log('Store Forecast Served', forecast);
 			return forecast;
 		} else {
 			console.log('New Data');
