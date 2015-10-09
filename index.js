@@ -55,7 +55,7 @@ SurfRouter.get('/', function(req, res) {
 SurfRouter.get('/locations/find/:partialName', Search.searchLocationsAndRegion);
 
 //Forecast Urls
-SurfRouter.get('/forecast/:locationId', apicache('1 hour') ,optionalTokenCheck, Forecasts.get);
+SurfRouter.get('/forecast/:locationId' ,optionalTokenCheck, Forecasts.get);
 // SurfRouter.get('/forecast/:latitude/:longitude', Forecasts.getWWO);
 
 //Location Favorite URLs
@@ -81,6 +81,12 @@ SurfRouter.post('/regions', Regions.create);
 
 SurfRouter.get('/sitemap/location', Sitemaps.locations);
 SurfRouter.get('/sitemap/region', Sitemaps.regions);
+
+
+SurfRouter.get('/update/', require('./routes/forecastRetriever.js'));
+
+var cron = require('./cron');
+    cron.initialise();
 
 //404 and Error Pages
 app.use(require('./middleware/notFound'));

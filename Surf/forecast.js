@@ -44,7 +44,7 @@ function purgeForecastsForLocation(locationId) {
 		if (error) {
 			deferred.reject({error: 'UNKNOWN_DB_ERROR', message: 'An error occured when removing a favourite', errorData: error});
 		} else {
-			deferred.resolve();
+			deferred.resolve(locationId);
 		}
 	});
 	return deferred.promise;
@@ -95,8 +95,9 @@ function storeWeather(locationId, weather) {
 }
 
 
-function getAndStoreWWOForecast(locationId) {
 
+function updateWWOForecast(locationId) {
+	console.log('Update', locationId);
 	return purgeForecastsForLocation(locationId).then(function () {
 		return Locations.getLocation(locationId);
 	}).then(function (data) {
@@ -105,26 +106,13 @@ function getAndStoreWWOForecast(locationId) {
 		console.log(result);
  		return storeWeather(locationId, result.data.weather);
 	}).then(function () {
-		return getForecastFromStore(locationId);
+		return locationId;
 	});
 }
-
-function getForecast(locationId) {
-	return getForecastFromStore(locationId).then(function (forecast) {
-		//Need to add in check here for which dates the forecast is on
-		if (forecast.length >= 7) {
-			return forecast;
-		} else {
-			console.log('New Data');
-			return getAndStoreWWOForecast(locationId);
-		}
-	});
-}
-
 
 
 function getFormattedForecast(locationId, userId) {
-	return q.all([Locations.getLocation(locationId, userId), getForecast(locationId)]).then(function(results) {
+	return q.all([Locations.getLocation(locationId, userId), getForecastFromStore(locationId)]).then(function(results) {
 		return {
 			location: results[0],
 			forecast: results[1]
@@ -134,5 +122,7 @@ function getFormattedForecast(locationId, userId) {
 
 module.exports = {
 	get: getFormattedForecast,
-	getForecastFromWWO: getForecastFromWWO
+	getForecastFromWWO: getForecastFromWWO,
+	purgeForecast: purgeForecastsForLocation,
+	updateWWOForecast: updateWWOForecast
 };
