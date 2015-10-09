@@ -33,7 +33,7 @@ function getToday() {
 
 function getForecastFromStore(locationId) {
 	// var deferred = q.defer();
-	return ForecastModel.find({location: locationId, date: {'$gte': getToday()}}).exec();
+	return ForecastModel.find({location: locationId}).exec();
 	// return deferred.promise;
 }
 
