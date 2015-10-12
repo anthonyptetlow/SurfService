@@ -6,9 +6,9 @@ function initialiseCrons () {
 
 	cron.scheduleJob('0 9 * * *', function () {
 		ForecastRetriever().then(function (data) {
-			console.log('CRON - Update Locations - Complete');
+			console.log('CRON - Update Locations - Completed '  + new Date());
 		});
-		console.log('CRON - Update Locations');
+		console.log('CRON - Update Locations - Started ' + new Date());
 	})
 }
 
