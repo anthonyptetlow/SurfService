@@ -12,7 +12,6 @@ function getForecast(req, res) {
     });
 }
 
-
 function getForecastFromWWO(req, res) {
     Forecast.getForecastFromWWO(req.params.latitude, req.params.longitude)
     .then(function (data) {
@@ -21,7 +20,22 @@ function getForecastFromWWO(req, res) {
         res.status(500).send(error);
     });
 }
+
+
+//v0.3
+
+function getForecastFromMachineName(req, res) {
+    Forecast.getFromMachineName(req.params.locationMachineName, req.user ? req.user.id : undefined)
+    .then(function (data) {
+        console.log(data);
+        res.json(data);
+    }, function (error) {
+        res.status(500).send(error);
+    });
+}
+
 module.exports = {
     get: getForecast,
+    getForecastFromMachineName: getForecastFromMachineName,
     getWWO: getForecastFromWWO
 };

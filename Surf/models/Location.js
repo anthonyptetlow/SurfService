@@ -4,6 +4,7 @@ var Schema       = mongoose.Schema;
 module.exports = mongoose.model('Location',
 	new Schema({
 		name: String,
+		machineName: String,
 		bearchPerp: Number,
 		bayImagePath: String,
 		image: {

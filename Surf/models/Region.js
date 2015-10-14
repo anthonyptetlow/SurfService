@@ -5,6 +5,10 @@ var Schema       = mongoose.Schema;
 
 var RegionSchema = new Schema({
 		name: String,
+		machineName: {
+			type: String,
+			unique: true
+		},
 		parentRegion: {
 			type: Schema.Types.ObjectId,
 			ref: 'Region'

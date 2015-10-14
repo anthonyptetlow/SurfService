@@ -9,13 +9,15 @@ function stripDatabaseLocation(location) {
 	return {
 		id: location._id,
 		name: location.name,
+		machineName: location.machineName,
 		image: location.image,
 		bayImagePath: location.bayImagePath,
 		coordinate: {
 			latitude: location.location[0],
 			longitude: location.location[1]
 		},
-		region: location.region
+		region: location.region,
+		isFavourite: location.isFavourite
 	};
 }
 
@@ -59,9 +61,7 @@ function getLocation(locationId, userId) {
 		}).then(function (populatedLocation) {
 
 			if (userId) {
-				console.log('Checking Fav');
 				return isFavourite(locationId, userId).then(function (isFavourite) {
-					console.log('Check Comlpete');
 					var strippedLocation = stripDatabaseLocation(location);
 					strippedLocation.isFavourite = isFavourite;
 					return strippedLocation;
@@ -134,9 +134,9 @@ function saveFavourite(locationId, userId) {
 }
 
 function isFavourite(locationId, userId) {
+	console.log(locationId, userId);
 	var deferred = q.defer();
 	getFavourites(userId).then(function (favourites) {
-		// console.log(favourites);
 		var matches = _.filter(favourites, function (favourite) {
 				return favourite.location.id.toString() == locationId ;});
 		deferred.resolve(matches.length > 0);
@@ -168,6 +168,25 @@ function getLocationsInRegion(regionId) {
 	});
 }
 
+//v0.3 Migration
+function getLocationFromMachineName(locationMachineName, userId) {
+	return LocationModel.find({machineName: locationMachineName}).populate('region').exec().then(function (locations) {
+		return LocationModel.populate(locations[0], {
+		    path: 'region.ancestors',
+		    model: 'Region'
+		});
+	}).then(function (populatedLocation) {
+		if (userId) {
+			return isFavourite(populatedLocation.id, userId).then(function (isFavourite) {
+				populatedLocation.isFavourite = isFavourite;
+				return populatedLocation;
+			});
+		} else {
+			return populatedLocation;
+		}
+	}).then(stripDatabaseLocation);
+}
+
 
 module.exports = {
 	createLocation: createLocation,
@@ -178,5 +197,6 @@ module.exports = {
 	getFavourites: getFavourites,
 	saveFavourite: saveFavourite,
 	isFavourite: isFavourite,
-	deleteFavourite: deleteFavourite
+	deleteFavourite: deleteFavourite,
+	getLocationFromMachineName: getLocationFromMachineName
 };

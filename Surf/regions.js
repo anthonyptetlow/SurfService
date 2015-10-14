@@ -20,10 +20,9 @@ function createRegion(regionOptions) {
 	return deferred.promise;
 }
 
-function getRegion(regionId, child) {
+function getRegion(regionId) {
 	return RegionModel.findById(regionId).populate('ancestors').exec();
 }
-
 
 
 function getAllRegions() {
@@ -35,9 +34,16 @@ function searchRegions(partialName) {
 	return RegionModel.find({name: new RegExp(partialName, 'i')});
 }
 
+
+function getRegionFromMachineName(machineName) {
+	return RegionModel.find({machineName: machineName}).populate('ancestors').exec().then(function (regions) { return regions[0];});
+}
+
+
 module.exports = {
 	createRegion: createRegion,
 	getRegion: getRegion,
 	getRegions: getAllRegions,
-	searchRegions: searchRegions
+	searchRegions: searchRegions,
+	getRegionFromMachineName: getRegionFromMachineName
 };

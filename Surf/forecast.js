@@ -97,13 +97,11 @@ function storeWeather(locationId, weather) {
 
 
 function updateWWOForecast(locationId) {
-	console.log('Update', locationId);
 	return purgeForecastsForLocation(locationId).then(function () {
 		return Locations.getLocation(locationId);
 	}).then(function (data) {
 		return getForecastFromWWO(data.coordinate.latitude, data.coordinate.longitude);
 	}).then(function (result) {
-		console.log(result);
  		return storeWeather(locationId, result.data.weather);
 	}).then(function () {
 		return locationId;
@@ -120,9 +118,25 @@ function getFormattedForecast(locationId, userId) {
 	});
 }
 
+
+
+function getFromMachineName(locationMachineName, userId) {
+	return Locations.getLocationFromMachineName(locationMachineName, userId).then(function (location) {
+		return getForecastFromStore(location.id).then(function (forecast) {
+			return {
+				location: location,
+				forecast: forecast
+			}
+		})
+	});
+}
+
+
+
 module.exports = {
 	get: getFormattedForecast,
 	getForecastFromWWO: getForecastFromWWO,
 	purgeForecast: purgeForecastsForLocation,
-	updateWWOForecast: updateWWOForecast
+	updateWWOForecast: updateWWOForecast,
+	getFromMachineName: getFromMachineName
 };

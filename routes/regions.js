@@ -39,9 +39,23 @@ function createRegion(req, res) {
     });
 }
 
+
+
+
+function getRegionFromMachineName(req, res) {
+    Regions.getRegionFromMachineName(req.params.regionMachineName)
+    .then(function (data) {
+        res.json(data);
+    }, function (error) {
+        res.status(500).send(error);
+    });
+}
+
+
 module.exports = {
 		getAll: getAll,
         get: getRegion,
-		find: findRegion,
-		create: createRegion
+        find: findRegion,
+        create: createRegion,
+        getFromMachineName: getRegionFromMachineName
 };

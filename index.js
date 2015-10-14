@@ -46,44 +46,11 @@ var Locations = require('./routes/locations.js'),
 SurfRouter = express.Router();
 
 //Set the base url for the router
-app.use('/api/surf/' + serverVersion, SurfRouter);
+app.use('/api/surf/v0.2', require('./routes/Surf_0.2.js'));
 
-SurfRouter.get('/', function(req, res) {
-    res.send('Welcome to the Surf Service ' + serverVersion);
-});
-
-SurfRouter.get('/locations/find/:partialName', Search.searchLocationsAndRegion);
-
-//Forecast Urls
-SurfRouter.get('/forecast/:locationId' ,optionalTokenCheck, Forecasts.get);
-// SurfRouter.get('/forecast/:latitude/:longitude', Forecasts.getWWO);
-
-//Location Favorite URLs
-SurfRouter.get('/locations/favourite', tokenCheck, Locations.favourites.get);
-SurfRouter.post('/locations/favourite', tokenCheck, Locations.favourites.add);
-SurfRouter.delete('/locations/favourite', tokenCheck, Locations.favourites.remove);
-
-//Location URLs
-SurfRouter.get('/locations', Locations.getAll);
-SurfRouter.get('/locations/:locationId', Locations.get);
-
-SurfRouter.get('/regions/locations/:regionId', Locations.getLocationsInRegion);
-
-// SurfRouter.get('/locations/find/:partialName', Locations.find);
-SurfRouter.post('/locations', Locations.create);
-
-//Location URLs
-SurfRouter.get('/regions', Regions.getAll);
-SurfRouter.get('/regions/find/:partialName', Regions.find);
-SurfRouter.get('/regions/:regionId', Regions.get);
-SurfRouter.post('/regions', Regions.create);
+app.use('/api/surf/v0.3', require('./routes/Surf_0.3.js'));
 
 
-SurfRouter.get('/sitemap/location', Sitemaps.locations);
-SurfRouter.get('/sitemap/region', Sitemaps.regions);
-
-
-SurfRouter.get('/update/', require('./routes/forecastRetriever.js'));
 
 var cron = require('./cron');
     cron.initialise();

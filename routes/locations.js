@@ -1,6 +1,6 @@
 var Locations = require('../Surf/locations.js');
 
-// Locations Routing Functions
+// Locations Routing Functions V0.2
 function getAll(req, res) {
     Locations.getLocations()
     .then(function (data) {
@@ -18,7 +18,6 @@ function getLocation(req, res) {
         res.status(500).send(error);
     });
 }
-
 
 function updateFromMSW(req, res) {
     Locations.updateAllLocations();
@@ -82,9 +81,23 @@ function getLocationsInRegion(req, res) {
     });
 }
 
+//V0.3
+
+function getFromMachName(req, res) {
+    Locations.getLocationFromMachineName(req.params.locationMachineName)
+    .then(function (data) {
+        res.json(data);
+    }, function (error) {
+        res.status(500).send(error);
+    });
+}
+
+
+
 module.exports = {
 		getAll: getAll,
         get: getLocation,
+        getFromMachName: getFromMachName,
 		find: findLocation,
         getLocationsInRegion: getLocationsInRegion,
 		create: createLocation,

@@ -1,7 +1,9 @@
 var Sitemap = require('sitemap');
 
-var Locations = require('../Surf/locations.js');
-var Regions = require('../Surf/regions.js');
+var Locations = require('../Surf/locations.js'),
+    Regions = require('../Surf/regions.js'),
+    Util = require('../Util');
+
 
 function stringToURL(value) {
     return (!value) ? '' : value.trim().replace(/ /g, '-').replace('\'', '-');
@@ -9,7 +11,7 @@ function stringToURL(value) {
 
 function generateForecastSitemapObj(location) {
     return {
-        url: '/forecast/' +  stringToURL(location.name) + '/' + location.id,
+        url: '/forecast/' +  location.machineName,
         changefreq: 'daily',
         priority: 1
     };
