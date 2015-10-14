@@ -49,7 +49,7 @@ function generateLocationsSitemap(req, res) {
 
 function generateRegionSitemapObj(region) {
     return {
-        url: '/region/' +  stringToURL(region.name) + '/' + region.id,
+        url: '/region/' + region.machineName,
         changefreq: 'monthly',
         priority: 1
     };
